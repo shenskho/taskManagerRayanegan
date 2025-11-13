@@ -16,19 +16,19 @@ const KanbanBoard = () => {
   const columns = {
     todo: {
       id: 'todo',
-      title: 'To Do',
+      title: 'برای انجام',
       taskIds: tasks.filter(task => task.status === 'todo').map(task => task.id),
       color: '#e74c3c'
     },
     inProgress: {
       id: 'inProgress',
-      title: 'In Progress',
+      title: 'در حال انجام',
       taskIds: tasks.filter(task => task.status === 'inProgress').map(task => task.id),
       color: '#f39c12'
     },
     done: {
       id: 'done',
-      title: 'Done',
+      title: 'انجام شده',
       taskIds: tasks.filter(task => task.status === 'done').map(task => task.id),
       color: '#27ae60'
     }
@@ -78,7 +78,7 @@ const KanbanBoard = () => {
   return (
     <div className="kanban-board">
       <div className="kanban-header">
-        <h1 className="page-title">Kanban Board</h1>
+        <h1 className="page-title">میزکار رایانگان</h1>
         <p className="page-subtitle">مدیریت وظایف با استفاده از روش میزکار رایانگان</p>
       </div>
 

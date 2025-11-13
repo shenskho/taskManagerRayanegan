@@ -1,10 +1,61 @@
 import api, { createMockResponse } from './api'
 
+const STATIC_AUTH_ENABLED = import.meta.env.VITE_USE_STATIC_AUTH !== 'false'
+const STATIC_EMAIL = (import.meta.env.VITE_STATIC_AUTH_EMAIL || 'admin@rayanegan.com').toLowerCase()
+const STATIC_PASSWORD = import.meta.env.VITE_STATIC_AUTH_PASSWORD || '123456'
+const STATIC_PERMISSIONS = [
+  'view_projects',
+  'create_projects',
+  'edit_projects',
+  'delete_projects',
+  'view_tasks',
+  'create_tasks',
+  'edit_tasks',
+  'delete_tasks',
+  'manage_users'
+]
+
+const buildStaticUser = () => ({
+  id: 'static-user-1',
+  name: 'رایانگان',
+  email: STATIC_EMAIL,
+  role: 'admin',
+  avatar: '/api/placeholder/40/40',
+  preferences: {
+    language: 'fa',
+    timezone: 'Asia/Tehran',
+    notifications: true
+  },
+  permissions: STATIC_PERMISSIONS,
+  createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: new Date().toISOString()
+})
+
 // Auth Service
 class AuthService {
   // Login user
   async login(credentials) {
     try {
+      if (STATIC_AUTH_ENABLED) {
+        const email = credentials.email?.trim().toLowerCase()
+        const password = credentials.password
+
+        if (email !== STATIC_EMAIL || password !== STATIC_PASSWORD) {
+          throw new Error('ایمیل یا رمز عبور نادرست است.')
+        }
+
+        const staticUser = buildStaticUser()
+        const mockResponse = {
+          user: staticUser,
+          token: `static-token-${Date.now()}`,
+          refreshToken: `static-refresh-${Date.now()}`,
+          permissions: STATIC_PERMISSIONS
+        }
+
+        localStorage.setItem('token', mockResponse.token)
+        return { data: mockResponse }
+      }
+
       if (import.meta.env.VITE_USE_MOCK_API === 'true') {
         const mockResponse = {
           user: {
@@ -35,6 +86,10 @@ class AuthService {
   // Register new user
   async register(userData) {
     try {
+      if (STATIC_AUTH_ENABLED) {
+        throw new Error('ثبت‌نام در حال حاضر فعال نیست. لطفاً با مدیر سیستم تماس بگیرید.')
+      }
+
       if (import.meta.env.VITE_USE_MOCK_API === 'true') {
         const mockResponse = {
           user: {
@@ -65,6 +120,11 @@ class AuthService {
   // Logout user
   async logout() {
     try {
+      if (STATIC_AUTH_ENABLED) {
+        localStorage.removeItem('token')
+        return { data: { success: true } }
+      }
+
       const response = await api.post('/auth/logout')
       // Clear token from localStorage
       localStorage.removeItem('token')
@@ -79,6 +139,11 @@ class AuthService {
   // Get user profile
   async getProfile() {
     try {
+      if (STATIC_AUTH_ENABLED) {
+        const staticUser = buildStaticUser()
+        return { data: staticUser }
+      }
+
       if (import.meta.env.VITE_USE_MOCK_API === 'true') {
         const mockProfile = {
           id: '1',

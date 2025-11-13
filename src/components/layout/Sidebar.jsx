@@ -1,10 +1,12 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { toggleSidebar } from '@/store/slices/uiSlice'
+import { logout } from '@/store/slices/authSlice'
 
 const Sidebar = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { sidebarCollapsed } = useSelector(state => state.ui)
   const { user } = useSelector(state => state.auth)
 
@@ -109,7 +111,13 @@ const Sidebar = () => {
       </nav>
 
       <div className="sidebar-footer">
-        <button className="btn btn-link logout-btn">
+        <button
+          className="btn btn-link logout-btn"
+          onClick={async () => {
+            await dispatch(logout())
+            navigate('/signup', { replace: true })
+          }}
+        >
           <i className="fas fa-sign-out-alt"></i>
           {!sidebarCollapsed && <span>خروج</span>}
         </button>

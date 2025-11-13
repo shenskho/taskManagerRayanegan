@@ -1,9 +1,10 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
+import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
 
-const Layout = ({ children }) => {
+const Layout = () => {
   const { sidebarCollapsed } = useSelector(state => state.ui)
 
   return (
@@ -12,7 +13,7 @@ const Layout = ({ children }) => {
       <div className={`main-content ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Header />
         <div className="content-wrapper">
-          {children}
+          <Outlet />
         </div>
       </div>
     </div>

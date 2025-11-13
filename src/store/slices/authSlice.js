@@ -1,6 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { authService } from '../../services/authService'
 
+const storedToken = localStorage.getItem('token')
+const storedUserRaw = localStorage.getItem('user')
+let storedUser = null
+
+if (storedUserRaw) {
+  try {
+    storedUser = JSON.parse(storedUserRaw)
+  } catch (error) {
+    console.error('Failed to parse stored user data:', error)
+    localStorage.removeItem('user')
+  }
+}
+
 // Async thunks for API calls
 export const login = createAsyncThunk('auth/login', async (credentials) => {
   const response = await authService.login(credentials)
@@ -22,33 +35,20 @@ export const fetchUserProfile = createAsyncThunk('auth/fetchUserProfile', async 
 })
 
 const initialState = {
-  user: {
-    id: '1',
-    name: 'علی احمدی',
-    email: 'ali@example.com',
-    role: 'admin',
-    avatar: '/api/placeholder/40/40',
-    preferences: {
-      language: 'fa',
-      timezone: 'Asia/Tehran',
-      notifications: true
-    }
-  },
-  isAuthenticated: true,
+  user: storedUser,
+  isAuthenticated: Boolean(storedToken && storedUser),
   loading: false,
   error: null,
-  token: 'sample-jwt-token-for-demo',
-  permissions: [
-    'view_projects',
-    'create_projects',
-    'edit_projects',
-    'delete_projects',
-    'view_tasks',
-    'create_tasks',
-    'edit_tasks',
-    'delete_tasks',
-    'manage_users'
-  ]
+  token: storedToken,
+  permissions: Array.isArray(storedUser?.permissions) ? storedUser.permissions : []
+}
+
+const persistUser = (user) => {
+  if (user) {
+    localStorage.setItem('user', JSON.stringify(user))
+  } else {
+    localStorage.removeItem('user')
+  }
 }
 
 const authSlice = createSlice({
@@ -59,17 +59,26 @@ const authSlice = createSlice({
       state.error = null
     },
     updateUserProfile: (state, action) => {
+      if (!state.user) return
       state.user = { ...state.user, ...action.payload }
+      persistUser(state.user)
     },
     updatePreferences: (state, action) => {
-      state.user.preferences = { ...state.user.preferences, ...action.payload }
-      localStorage.setItem('userPreferences', JSON.stringify(state.user.preferences))
+      if (!state.user) return
+      const currentPreferences = state.user.preferences || {}
+      state.user = {
+        ...state.user,
+        preferences: { ...currentPreferences, ...action.payload }
+      }
+      persistUser(state.user)
     },
     clearAuthData: (state) => {
       state.user = null
       state.isAuthenticated = false
       state.token = null
       state.permissions = []
+      persistUser(null)
+      localStorage.removeItem('token')
     }
   },
   extraReducers: (builder) => {
@@ -84,12 +93,13 @@ const authSlice = createSlice({
         state.isAuthenticated = true
         state.user = action.payload.user
         state.token = action.payload.token
-        state.permissions = action.payload.permissions
+        state.permissions = action.payload.permissions || []
         localStorage.setItem('token', action.payload.token)
+        persistUser(action.payload.user)
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message
+        state.error = action.error?.message || 'ورود ناموفق بود.'
       })
       // Register
       .addCase(register.pending, (state) => {
@@ -101,24 +111,35 @@ const authSlice = createSlice({
         state.isAuthenticated = true
         state.user = action.payload.user
         state.token = action.payload.token
-        state.permissions = action.payload.permissions
+        state.permissions = action.payload.permissions || []
         localStorage.setItem('token', action.payload.token)
+        persistUser(action.payload.user)
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message
+        state.error = action.error?.message || 'ثبت‌نام ناموفق بود.'
       })
       // Logout
+      .addCase(logout.pending, (state) => {
+        state.loading = true
+      })
       .addCase(logout.fulfilled, (state) => {
+        state.loading = false
         state.user = null
         state.isAuthenticated = false
         state.token = null
         state.permissions = []
         localStorage.removeItem('token')
+        persistUser(null)
+      })
+      .addCase(logout.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error?.message || 'خروج از حساب ناموفق بود.'
       })
       // Fetch Profile
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.user = action.payload
+        persistUser(action.payload)
       })
   }
 })

@@ -170,7 +170,7 @@ const Projects = () => {
         </Col>
       </Row>
       <Row>
-        <div className="d-flex justify-content-between gap-20px">
+        <div className="d-flex ">
           {projects.map((project) => (
             <Card>
               <CardBody>
