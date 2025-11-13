@@ -1,0 +1,159 @@
+/* Dashboard Styles */
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-subtitle {
+  color: #6c757d;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.stats-card {
+  text-align: center;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.stats-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.stats-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.stats-label {
+  color: #6c757d;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.project-item {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef !important;
+  transition: all 0.3s ease;
+}
+
+.project-item:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.project-item h6 {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* Table styles for dashboard */
+.table th {
+  border-top: none;
+  font-weight: 600;
+  color: #495057;
+  background-color: #f8f9fa;
+}
+
+.table td {
+  vertical-align: middle;
+  border-color: #e9ecef;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .stats-number {
+    font-size: 2rem;
+  }
+  
+  .stats-icon {
+    font-size: 2.5rem;
+  }
+  
+  .stats-card {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-title {
+    font-size: 1.25rem;
+  }
+  
+  .stats-number {
+    font-size: 1.75rem;
+  }
+  
+  .stats-icon {
+    font-size: 2rem;
+  }
+}
+
+/* Dark mode support for dashboard */
+@media (prefers-color-scheme: dark) {
+  .page-title {
+    background: linear-gradient(135deg, #8e9eab 0%, #eef2f3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .stats-card {
+    background: #2d2d2d;
+    color: #ffffff;
+  }
+  
+  .stats-number {
+    color: #ffffff;
+  }
+  
+  .project-item {
+    background: #3d3d3d;
+    border-color: #4d4d4d !important;
+  }
+  
+  .project-item:hover {
+    background: #4d4d4d;
+  }
+  
+  .table th {
+    background-color: #3d3d3d;
+    color: #ffffff;
+  }
+  
+  .table td {
+    color: #ffffff;
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: #3d3d3d;
+  }
+}
