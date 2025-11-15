@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://172.16.30.116:8080/'
 const API_TIMEOUT = 10000 // 10 seconds
 
 // Create axios instance
@@ -37,27 +37,50 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     // Log response for debugging
-    console.log(`API Response: ${response.status} ${response.config.url}`)
+    console.log(`API Response: ${response.status} ${response.config.url}`, response.data)
     return response
   },
   (error) => {
     console.error('API Response Error:', error)
     
+    // Extract error message from API response
+    let errorMessage = 'خطا در ارتباط با سرور'
+    
+    if (error.response?.data) {
+      // Try to get error message from different response formats
+      errorMessage = 
+        error.response.data.message || 
+        error.response.data.error?.message ||
+        error.response.data.title ||
+        error.response.data.errors?.join(', ') ||
+        errorMessage
+    } else if (error.request) {
+      errorMessage = 'عدم پاسخ از سرور. لطفاً اتصال اینترنت را بررسی کنید.'
+    }
+    
     // Handle specific error cases
     if (error.response?.status === 401) {
       // Unauthorized - redirect to login
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      localStorage.removeItem('user')
+      // Don't redirect if already on login page
+      if (window.location.pathname !== '/signup' && window.location.pathname !== '/login') {
+        window.location.href = '/signup' 
+      }
+      errorMessage = errorMessage || 'احراز هویت نامعتبر است. لطفاً دوباره وارد شوید.'
     } else if (error.response?.status === 403) {
-      // Forbidden - show error message
-      console.error('Access forbidden')
+      // Forbidden
+      errorMessage = errorMessage || 'دسترسی مجاز نیست.'
     } else if (error.response?.status === 404) {
       // Not found
-      console.error('Resource not found')
+      errorMessage = errorMessage || 'منبع مورد نظر یافت نشد.'
     } else if (error.response?.status >= 500) {
       // Server error
-      console.error('Server error occurred')
+      errorMessage = errorMessage || 'خطای سرور. لطفاً بعداً تلاش کنید.'
     }
+    
+    // Attach user-friendly error message
+    error.userMessage = errorMessage
     
     return Promise.reject(error)
   }

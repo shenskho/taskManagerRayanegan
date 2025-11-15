@@ -136,8 +136,8 @@ const Signup = () => {
                   <button
                     type="button"
                     className={`btn w-50 ${isRegisterMode ? 'btn-primary' : 'btn-outline-primary'}`}
-                    onClick={() => handleModeSwitch('register')}
-                    disabled={!registrationEnabled}
+                    onClick={() => navigate('/register')}
+                    // disabled={!registrationEnabled}
                     title={registrationEnabled ? undefined : 'ثبت‌نام به‌زودی فعال می‌شود.'}
                   >
                     ثبت‌نام

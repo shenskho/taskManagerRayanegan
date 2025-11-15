@@ -1,6 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+// برای ES modules: تعریف __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 export default defineConfig({
   plugins: [react()],
@@ -19,9 +24,31 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    host: true, // برای دسترسی از شبکه محلی
+    proxy: {
+      '/api': {
+        target: 'https://localhost:7271',
+        changeOrigin: true,
+        secure: false, // برای self-signed certificates در localhost
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+      },
+    },
   },
   build: {
     outDir: 'dist',
     sourcemap: true,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          redux: ['@reduxjs/toolkit', 'react-redux'],
+          ui: ['reactstrap', 'bootstrap'],
+        },
+      },
+    },
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom'],
   },
 })

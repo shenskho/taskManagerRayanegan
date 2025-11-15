@@ -1,4 +1,5 @@
 import api, { createMockResponse } from './api'
+import { getPlaceholderImage } from '../utils/imageUtils'
 
 // Project Service
 class ProjectService {
@@ -185,7 +186,7 @@ class ProjectService {
             name: 'علی احمدی',
             email: 'ali@example.com',
             role: 'manager',
-            avatar: '/api/placeholder/32/32',
+            avatar: getPlaceholderImage(32, 32),
             joinedAt: '2024-09-15T08:00:00Z'
           },
           {
@@ -193,7 +194,7 @@ class ProjectService {
             name: 'مریم محمدی',
             email: 'maryam@example.com',
             role: 'developer',
-            avatar: '/api/placeholder/32/32',
+            avatar: getPlaceholderImage(32, 32),
             joinedAt: '2024-09-20T09:00:00Z'
           }
         ]

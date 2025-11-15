@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { toggleSidebar } from '@/store/slices/uiSlice'
 import { logout } from '@/store/slices/authSlice'
+import { getUserAvatar } from '@/utils/imageUtils'
 
 const Sidebar = () => {
   const dispatch = useDispatch()
@@ -79,7 +80,7 @@ const Sidebar = () => {
 
       <div className="sidebar-user">
         <img 
-          src={user?.avatar || '/api/placeholder/48/48'} 
+          src={getUserAvatar(user?.avatar, 48)} 
           alt={user?.name}
           className="user-avatar"
         />

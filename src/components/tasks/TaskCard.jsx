@@ -2,6 +2,7 @@ import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import { setCurrentTask } from '../../store/slices/tasksSlice';
+import { getUserAvatar } from '../../utils/imageUtils';
 
 const TaskCard = ({ task, index }) => {
   const dispatch = useDispatch();
@@ -61,7 +62,7 @@ const TaskCard = ({ task, index }) => {
           <div className="task-meta">
             <div className="task-assignee">
               <img 
-                src={task.assignee?.avatar || '/api/placeholder/32/32'} 
+                src={getUserAvatar(task.assignee?.avatar, 32)} 
                 alt={task.assignee?.name || 'Unknown'}
                 className="assignee-avatar"
               />

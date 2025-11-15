@@ -1,13 +1,22 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { toggleSidebar } from '@/store/slices/uiSlice'
+import { logout } from '@/store/slices/authSlice'
+import { getUserAvatar } from '@/utils/imageUtils'
 
 const Header = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { user } = useSelector(state => state.auth)
   const { notifications } = useSelector(state => state.ui)
   
   const unreadNotifications = notifications.filter(n => !n.isRead).length
+  
+  const handleLogout = () => {
+    dispatch(logout())
+    navigate('/signup', { replace: true })
+  }
 
   return (
     <header className="header">
@@ -42,12 +51,28 @@ const Header = () => {
         <div className="user-dropdown">
           <button className="btn btn-link user-btn">
             <img 
-              src={user?.avatar || '/api/placeholder/32/32'} 
+              src={getUserAvatar(user?.avatar, 32)} 
               alt={user?.name}
               className="user-avatar"
             />
-            <span className="user-name">{user?.name || 'کاربر'}</span>
-            <i className="fas fa-chevron-down"></i>
+            <select 
+              className='border-0'
+              onChange={(e) => {
+                if (e.target.value === 'logout') {
+                  handleLogout()
+                }
+              }}
+              defaultValue=""
+            >
+              <option value="" className="user-name">{user?.name || 'کاربر'}</option>
+              <option value="logout">خروج</option>
+            </select>
+            {/* <span className="user-name">{user?.name || 'کاربر'}</span>
+            <i className="fas fa-chevron-down">
+              <select>
+                <option value="..">خروج</option>
+              </select>
+            </i> */}
           </button>
         </div>
       </div>
