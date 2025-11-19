@@ -1,13 +1,11 @@
 import axios from 'axios'
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://172.16.30.116:8080/'
-const API_TIMEOUT = 10000 // 10 seconds
+const API_BASE_URL = "http://172.16.30.116:8080/"
 
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -52,7 +50,7 @@ api.interceptors.response.use(
         error.response.data.message || 
         error.response.data.error?.message ||
         error.response.data.title ||
-        error.response.data.errors?.join(', ') ||
+        (Array.isArray(error.response.data.errors) ? error.response.data.errors.join(', ') : undefined) ||
         errorMessage
     } else if (error.request) {
       errorMessage = 'عدم پاسخ از سرور. لطفاً اتصال اینترنت را بررسی کنید.'
@@ -65,7 +63,7 @@ api.interceptors.response.use(
       localStorage.removeItem('user')
       // Don't redirect if already on login page
       if (window.location.pathname !== '/signup' && window.location.pathname !== '/login') {
-        window.location.href = '/signup' 
+        window.location.href = '/signup'
       }
       errorMessage = errorMessage || 'احراز هویت نامعتبر است. لطفاً دوباره وارد شوید.'
     } else if (error.response?.status === 403) {

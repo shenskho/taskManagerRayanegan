@@ -27,7 +27,7 @@ export default defineConfig({
     host: true, // برای دسترسی از شبکه محلی
     proxy: {
       '/api': {
-        target: 'https://localhost:7271',
+        target: 'http://172.16.30.116:8080',
         changeOrigin: true,
         secure: false, // برای self-signed certificates در localhost
         rewrite: (path) => path.replace(/^\/api/, '/api'),

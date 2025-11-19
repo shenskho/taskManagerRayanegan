@@ -16,27 +16,28 @@ import {
   Spinner,
 } from "reactstrap";
 import logo from "@assets/images/logo/logo2.png";
-import {
-  clearError,
-  register as registerAction,
-} from "@store/slices/authSlice";
+import { clearError } from "@store/slices/authSlice";
+import { authService } from "@/services/authService";
 
 const initialFormState = {
-  name: "",
-  email: "",
+  nationalCode: "",
   password: "",
-  confirmPassword: "",
+  rePassword: "",
+  firstName: "",
+  lastName: "",
+  gender: "", // 1 male, 2 female
+  parentRef: "",
 };
 
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated } = useSelector(
-    (state) => state.auth
-  );
+  const { error, isAuthenticated } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState(initialFormState);
   const [localError, setLocalError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -46,7 +47,6 @@ const Register = () => {
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
-    // Clear error when component mounts
     if (error) {
       dispatch(clearError());
     }
@@ -54,70 +54,104 @@ const Register = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    console.log("📝 register: change", name, value);
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
-    if (localError) {
-      setLocalError("");
-    }
-    if (error) {
-      dispatch(clearError());
-    }
+    if (localError) setLocalError("");
+    if (error) dispatch(clearError());
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
-      setLocalError("نام و نام‌خانوادگی خود را وارد کنید.");
+    if (!formData.nationalCode.trim()) {
+      setLocalError("کد ملی را وارد کنید.");
       return false;
     }
-
-    if (!formData.email.trim()) {
-      setLocalError("وارد کردن ایمیل الزامی است.");
+    if (!formData.firstName.trim()) {
+      setLocalError("نام را وارد کنید.");
       return false;
     }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email.trim())) {
-      setLocalError("ایمیل وارد شده معتبر نیست.");
+    if (!formData.lastName.trim()) {
+      setLocalError("نام خانوادگی را وارد کنید.");
       return false;
     }
-
     if (!formData.password.trim()) {
       setLocalError("وارد کردن رمز عبور الزامی است.");
       return false;
     }
-
     if (formData.password.length < 6) {
       setLocalError("طول رمز عبور باید حداقل ۶ کاراکتر باشد.");
       return false;
     }
-
-    if (formData.password !== formData.confirmPassword) {
+    if (!formData.rePassword.trim()) {
+      setLocalError("تکرار رمز عبور را وارد کنید.");
+      return false;
+    }
+    if (formData.password !== formData.rePassword) {
       setLocalError("رمز عبور و تکرار آن یکسان نیست.");
       return false;
     }
-
+    if (!String(formData.gender)) {
+      setLocalError("جنسیت را انتخاب کنید.");
+      return false;
+    }
     return true;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log('📨 register: submit clicked');
     setLocalError("");
+    setSuccessMsg("");
 
     if (!validateForm()) {
+      console.warn("⚠️ register: validation failed", formData);
       return;
     }
 
-    dispatch(
-      registerAction({
-        name: formData.name.trim(),
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password,
-      })
-    );
+    try {
+      setSubmitting(true);
+      const payload = {
+        ...formData,
+        gender: Number(formData.gender),
+        parentRef: formData.parentRef.trim(),
+      };
+      if (!payload.parentRef) {
+        delete payload.parentRef;
+      }
+      console.log("🔵 register: about to call authService.register with", {
+        ...payload,
+        password: "***",
+        rePassword: "***",
+      });
+      const res = await authService.register(payload);
+      console.log("🟢 register: response", res);
+      console.log("🟢 register: response status", res?.status);
+      console.log("🟢 register: response data", res?.data);
+      
+      // Check if successful (status 200-299 or no status but has data)
+      if ((res?.status >= 200 && res?.status < 300) || (!res?.status && res?.data)) {
+        setSuccessMsg("ثبت‌نام با موفقیت انجام شد. اکنون می‌توانید وارد شوید.");
+        setTimeout(() => navigate("/signup", { replace: true }), 1000);
+      } else {
+        setLocalError(
+          res?.data?.message ||
+            res?.data?.error ||
+            (typeof res?.data === "string" ? res.data : "") ||
+            "ثبت‌نام ناموفق بود."
+        );
+      }
+    } catch (e) {
+      console.error("❌ register: error", e);
+      const serverMsg =
+        e?.response?.data?.message ||
+        e?.response?.data?.error ||
+        (typeof e?.response?.data === "string" ? e.response.data : "");
+      setLocalError(serverMsg || e?.message || "ثبت‌نام ناموفق بود.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -148,27 +182,58 @@ const Register = () => {
                   <p className="text-muted mb-0">حساب کاربری جدید ایجاد کنید</p>
                 </div>
 
-              
-                {(localError || error) && (
-                  <Alert color="danger" className="py-2">
-                    {localError || error}
+                {(successMsg || localError || error) && (
+                  <Alert color={successMsg ? "success" : "danger"} className="py-2" fade={false}>
+                    {successMsg || localError || error}
                   </Alert>
                 )}
 
                 <Form onSubmit={handleSubmit} noValidate>
                   <FormGroup>
-                    <Label for="name" className="form-label">
-                      نام کاربری
+                    <Label for="nationalCode" className="form-label">
+                      کد ملی
                     </Label>
                     <Input
-                      id="name"
-                      name="name"
+                      id="nationalCode"
+                      name="nationalCode"
                       type="text"
-                      placeholder="مثال: امیر"
-                      value={formData.name}
+                      placeholder="مثال: amir123"
+                      value={formData.nationalCode}
                       onChange={handleChange}
                       required
-                      invalid={!!localError && !formData.name.trim()}
+                      invalid={!!localError && !formData.nationalCode.trim()}
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label for="firstName" className="form-label">
+                      نام
+                    </Label>
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      placeholder="مثال: امیر"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
+                      invalid={!!localError && !formData.firstName.trim()}
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label for="lastName" className="form-label">
+                      نام خانوادگی
+                    </Label>
+                    <Input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      placeholder="مثال: غلامپور"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
+                      invalid={!!localError && !formData.lastName.trim()}
                     />
                   </FormGroup>
 
@@ -187,92 +252,59 @@ const Register = () => {
                       minLength={6}
                       invalid={
                         !!localError &&
-                        (formData.password.length < 6 ||
-                          !formData.password.trim())
+                        (formData.password.length < 6 || !formData.password.trim())
                       }
                     />
                   </FormGroup>
 
                   <FormGroup>
-                    <Label for="confirmPassword" className="form-label">
+                    <Label for="rePassword" className="form-label">
                       تکرار رمز عبور
                     </Label>
                     <Input
-                      id="confirmPassword"
-                      name="confirmPassword"
+                      id="rePassword"
+                      name="rePassword"
                       type="password"
                       placeholder="رمز عبور را تکرار کنید"
-                      value={formData.confirmPassword}
+                      value={formData.rePassword}
                       onChange={handleChange}
                       required
                       minLength={6}
-                      invalid={
-                        !!localError &&
-                        formData.password !== formData.confirmPassword
-                      }
+                      invalid={!!localError && formData.password !== formData.rePassword}
                     />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label for="email" className="form-label">
-                      ایمیل
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="example@mail.com"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      invalid={!!localError && !formData.email.trim()}
-                    />
-                  </FormGroup>
-                    <FormGroup>
-                    <Label for="name" className="form-label">
-                      نام 
-                    </Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      placeholder="مثال: امیرحسین"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      invalid={!!localError && !formData.name.trim()}
-                    />
-                  </FormGroup>
-                    <FormGroup>
-                    <Label for="name" className="form-label">
-                      نام خانوادگی
-                    </Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      placeholder="مثال: غلام پور"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      invalid={!!localError && !formData.name.trim()}
-                    />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label>جنسیت</Label>
-                    <Input type="select" name="gender" required>
-                      <option value="">انتخاب کنید</option>
-                      <option value="">مرد</option>
-                      <option value="">زن</option>
-                      </Input>
                   </FormGroup>
 
-                  <Button
-                    type="submit"
-                    color="primary"
-                    className="w-100"
-                    disabled={loading}
-                  >
-                    {loading ? (
+                  <FormGroup>
+                    <Label className="form-label">جنسیت</Label>
+                    <Input
+                      type="select"
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">انتخاب کنید</option>
+                      <option value="1">مرد</option>
+                      <option value="2">زن</option>
+                    </Input>
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label for="parentRef" className="form-label">
+                      کد معرف (اختیاری)
+                    </Label>
+                    <Input
+                      id="parentRef"
+                      name="parentRef"
+                      type="text"
+                      placeholder="مثال: 3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                      value={formData.parentRef}
+                      onChange={handleChange}
+                    />
+                  </FormGroup>
+
+                  <Button type="submit" color="primary" className="w-100" disabled={submitting}>
+                    {submitting ? (
                       <>
                         <Spinner size="sm" className="me-2" />
                         لطفاً صبر کنید...

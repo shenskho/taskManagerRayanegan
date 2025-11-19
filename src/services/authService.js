@@ -178,7 +178,10 @@ class AuthService {
   // Register new user
   async register(userData) {
     try {
+      console.log('🔍 Register: VITE_USE_MOCK_API =', import.meta.env.VITE_USE_MOCK_API)
+      
       if (import.meta.env.VITE_USE_MOCK_API === 'true') {
+        console.warn('⚠️ Register: Using MOCK API (not calling real API)')
         const mockResponse = {
           user: {
             id: Date.now().toString(),
@@ -195,13 +198,52 @@ class AuthService {
         // Store token in localStorage for mock mode
         localStorage.setItem('token', mockResponse.token)
         await createMockResponse(mockResponse)
-        return { data: mockResponse } // Return just the data, not the full response object
+        // Return mock axios-like response
+        return { 
+          status: 200,
+          statusText: 'OK',
+          data: mockResponse 
+        }
       }
 
-      const response = await api.post('/auth/register', userData)
+      // Map incoming fields to API contract
+        const payload = {
+          nationalCode:
+            userData.nationalCode?.trim() || userData.userName?.trim(),
+          password: userData.password,
+          rePassword: userData.rePassword ?? userData.confirmPassword,
+          firstName: userData.firstName?.trim(),
+          lastName: userData.lastName?.trim(),
+          gender: Number(userData.gender), // 1: male, 2: female
+        }
+
+        if (userData.parentRef?.trim()) {
+          payload.parentRef = userData.parentRef.trim()
+        }
+
+      console.log('🔵 Sending sign-up request to', '/api/Authentication/sign-up')
+      console.log('🔵 Sign-up payload (sanitized):', {
+        ...payload,
+        password: '***',
+        rePassword: '***'
+      })
+
+      // Use proxied relative URL to avoid CORS in dev
+      const response = await api.post('/api/Authentication/sign-up', payload)
+
+      console.log('🟢 Sign-up response status:', response.status)
+      console.log('🟢 Sign-up response data:', response.data)
+
       return response
     } catch (error) {
-      throw error
+      const serverMsg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        (typeof error?.response?.data === 'string' ? error.response.data : '') ||
+        error?.message ||
+        'ثبت‌نام ناموفق بود.'
+      console.error('❌ Sign-up error:', serverMsg)
+      throw new Error(serverMsg)
     }
   }
 
