@@ -1,0 +1,28 @@
+.rht-container {
+  position: fixed;
+  z-index: 1060;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 240px;
+  max-width: 360px;
+}
+
+.rht-top { top: 16px; }
+.rht-bottom { bottom: 16px; }
+.rht-right { right: 16px; }
+.rht-left { left: 16px; }
+
+.rht-toast {
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+  font-size: 14px;
+  background: #2f80ed;
+  direction: rtl;
+}
+
+.rht-toast.success { background: #28c76f; }
+.rht-toast.error { background: #ea5455; }
+.rht-toast.loading { background: #7367f0; }
