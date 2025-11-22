@@ -1,7 +1,0 @@
-export * from './http/urls'
-export * from './http/instances'
-export { authService } from './authService'
-export { taskService } from './taskService'
-export { projectService } from './projectService'
-export { notificationService } from './notificationService'
-export { fileService } from './fileService'
