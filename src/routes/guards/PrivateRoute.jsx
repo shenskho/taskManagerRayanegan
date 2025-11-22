@@ -1,20 +1,21 @@
 import React from 'react'
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import useAuth from '@/hooks/useAuth'
+import { Navigate } from 'react-router-dom'
+import useAuth from '@hooks/useAuth'
+import useAbility from '@hooks/useAbility'
 
-const PrivateRoute = ({ children }) => {
-  const location = useLocation()
-  const { isAuthenticated, loading } = useAuth()
-
-  if (loading) {
-    return <div className="text-center p-5">در حال بارگذاری...</div>
-  }
+const PrivateRoute = ({ children, meta }) => {
+  const { isAuthenticated } = useAuth()
+  const ability = useAbility()
 
   if (!isAuthenticated) {
-    return <Navigate to="/signup" replace state={{ from: location }} />
+    return <Navigate to="/login" replace />
   }
 
-  return children || <Outlet />
+  if (meta?.action && meta?.subject && !ability.can(meta.action, meta.subject)) {
+    return <Navigate to="/not-authorized" replace />
+  }
+
+  return children
 }
 
 export default PrivateRoute

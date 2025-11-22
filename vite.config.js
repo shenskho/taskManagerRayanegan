@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react-swc'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-// برای ES modules: تعریف __dirname
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -12,27 +11,27 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@components': path.resolve(__dirname, './src/components'),
+      '@api': path.resolve(__dirname, './src/api'),
+      '@configs': path.resolve(__dirname, './src/configs'),
+      '@core': path.resolve(__dirname, './src/core'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@layouts': path.resolve(__dirname, './src/layouts'),
       '@pages': path.resolve(__dirname, './src/pages'),
+      '@routes': path.resolve(__dirname, './src/routes'),
       '@store': path.resolve(__dirname, './src/store'),
-      '@services': path.resolve(__dirname, './src/services'),
-      '@utils': path.resolve(__dirname, './src/utils'),
-      '@assets': path.resolve(__dirname, './src/assets'),
       '@styles': path.resolve(__dirname, './src/styles'),
-      'nprogress': path.resolve(__dirname, './src/libs/nprogress'),
-      'react-hot-toast': path.resolve(__dirname, './src/libs/react-hot-toast'),
+      '@utils': path.resolve(__dirname, './src/utils'),
     },
   },
   server: {
     port: 3000,
     open: true,
-    host: true, // برای دسترسی از شبکه محلی
+    host: true,
     proxy: {
       '/api': {
-        target: 'http://172.16.30.116:8080',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
         changeOrigin: true,
-        secure: false, // برای self-signed certificates در localhost
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
+        secure: false,
       },
     },
   },
