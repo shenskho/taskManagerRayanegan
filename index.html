@@ -10,6 +10,12 @@
       content="Kanban Project Management System - سیستم مدیریت پروژه کَنبَن"
     /> -->
     <!-- <link rel="apple-touch-icon" href="/logo192.png" /> -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
@@ -19,6 +25,48 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Suppress console warnings early, before any modules load
+      (function() {
+        const originalWarn = console.warn;
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        const suppressPatterns = [
+          /Download the React DevTools/i,
+          /React DevTools/i,
+          /production build of Inferno/i,
+          /dev:module entry point/i,
+        ];
+        
+        const shouldSuppress = (args) => {
+          if (!args || args.length === 0) return false;
+          for (const arg of args) {
+            if (typeof arg === 'string') {
+              for (const pattern of suppressPatterns) {
+                if (pattern.test(arg)) return true;
+              }
+            }
+            if (arg && typeof arg === 'object' && arg.message) {
+              for (const pattern of suppressPatterns) {
+                if (pattern.test(String(arg.message))) return true;
+              }
+            }
+          }
+          return false;
+        };
+        
+        console.warn = function(...args) {
+          if (!shouldSuppress(args)) originalWarn.apply(console, args);
+        };
+        console.log = function(...args) {
+          if (!shouldSuppress(args)) originalLog.apply(console, args);
+        };
+        console.error = function(...args) {
+          if (!shouldSuppress(args)) originalError.apply(console, args);
+        };
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

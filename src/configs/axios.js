@@ -2,7 +2,7 @@ import axios from 'axios'
 import NProgress from 'nprogress'
 import toast from 'react-hot-toast'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const startLoading = () => {
   NProgress.configure({ showSpinner: false })
@@ -16,7 +16,7 @@ const endLoading = () => {
 const withAuth = (config) => {
   const token = localStorage.getItem('token')
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = token
   }
   return config
 }

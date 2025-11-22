@@ -1,6 +1,6 @@
 const API_URLS = {
   auth: {
-    login: '/auth/login',
+    login: '/api/Authentication/sign-in',
     me: '/auth/me',
   },
   reports: {
