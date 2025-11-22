@@ -1,0 +1,19 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'nprogress/nprogress.css';
+@import 'animate.css/animate.min.css';
+
+:root {
+  --bs-font-sans-serif: 'Vazirmatn', 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  background-color: #f8f9fa;
+}
+
+.vertical-layout .navbar-brand {
+  font-weight: 700;
+}
+
+.reports-page .dx-datagrid-headers {
+  background: #f1f3f5;
+}
